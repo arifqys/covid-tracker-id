@@ -10,9 +10,10 @@ import FlagId from './img/flag-id.png';
 class App extends Component {
   state = {
     data: null,
-    articles: [],
     isLoaded: false,
+    articles: [],
     articlesIsLoaded: false,
+    articlesIsError: false,
     theme: lightTheme
   }
 
@@ -29,10 +30,17 @@ class App extends Component {
     fetch('https://newsapi.org/v2/everything?q=corona+covid&apiKey=' +process.env.REACT_APP_NEWS_API_KEY +'&language=id&sortBy=publishedAt&pageSize=5&page=1')
       .then(res => res.json())
       .then(res => {
-        this.setState({
-          articlesIsLoaded: true,
-          articles: res.articles
-        })
+        if (res.status === 'error') {
+          this.setState({
+            articlesIsLoaded: true,
+            articlesIsError: true,
+          })
+        } else {
+          this.setState({
+            articlesIsLoaded: true,
+            articles: res.articles || [],
+          })
+        }
       })
   }
 
@@ -85,6 +93,10 @@ class App extends Component {
                     </div>
                   )
                 })}
+                {this.state.articlesIsError && (
+                  <p className="text-center">Gagal memuat berita</p>
+                )
+                }
             </div>
             <footer>
               API by <a href="https://mathdro.id/" target="_blank" rel="noopener noreferrer">mathdroid</a> and <a href="https://newsapi.org/" target="_blank" rel="noopener noreferrer">newsapi</a>
