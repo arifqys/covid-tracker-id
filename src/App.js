@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from './theme';
 import { GlobalStyles } from './global';
@@ -6,105 +6,77 @@ import './App.css';
 
 import ModeToggle from './components/ModeToggle/ModeToggle';
 import FlagId from './img/flag-id.png';
+import useCovidStats from './hooks/useCovidStats';
+import useNews from './hooks/useNews';
 
-class App extends Component {
-  state = {
-    data: null,
-    isLoaded: false,
-    articles: [],
-    articlesIsLoaded: false,
-    articlesIsError: false,
-    theme: lightTheme
-  }
+const SkeletonView = () => (
+  <span className="skeleton-view"></span>
+)
 
-  componentDidMount() {
-    fetch('https://covid19.mathdro.id/api/countries/IDN')
-      .then(res => res.json())
-      .then(res => {
-        this.setState({
-          isLoaded: true,
-          data: res
-        })
-      })
+const App = () => {
+  const [theme, setTheme] = useState(lightTheme)
+  const { data: stats, status: statsStatus } = useCovidStats()
+  const { data: news, status: newsStatus } = useNews()
 
-    fetch('https://newsapi.org/v2/everything?q=corona+covid&apiKey=' +process.env.REACT_APP_NEWS_API_KEY +'&language=id&sortBy=publishedAt&pageSize=5&page=1')
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === 'error') {
-          this.setState({
-            articlesIsLoaded: true,
-            articlesIsError: true,
-          })
-        } else {
-          this.setState({
-            articlesIsLoaded: true,
-            articles: res.articles || [],
-          })
-        }
-      })
-  }
-
-  changeTheme = () => {
-    if (this.state.theme === lightTheme) {
-      this.setState({theme: darkTheme})
+  const changeTheme = () => {
+    if (theme === lightTheme) {
+      setTheme(darkTheme)
     }
     else {
-      this.setState({theme: lightTheme})
+      setTheme(lightTheme)
     }
   }
 
-  
-  render() {
-    let loading = (
-      <span className="skeleton-view"></span>
-    )
+  return (
+    <ThemeProvider theme={theme}>
+      <GlobalStyles />
+        <div className="container">
+          <h1>Covid Tracker ID <img src={FlagId} alt="Indonesia" height="30" style={{marginBottom: '-5px'}}></img></h1>
+          <ModeToggle clicked={changeTheme} />
 
-    return (
-      <ThemeProvider theme={this.state.theme}>
-        <GlobalStyles />
-          <div className="container">
-            <h1>Covid Tracker ID <img src={FlagId} alt="Indonesia" height="30" style={{marginBottom: '-5px'}}></img></h1>
-            <ModeToggle clicked={this.changeTheme} />
-            <div className="flex-home">
-              <div className="box">
-                <p className="num" style={{color: "#f2c94c"}}>{this.state.isLoaded ? this.state.data.confirmed.value : loading}</p>
-                <p className="box-title">Terkonfirmasi</p>
-              </div>
-              <div className="box">
-                <p className="num" style={{color: "#219653"}}>{this.state.isLoaded ? this.state.data.recovered.value : loading}</p>
-                <p className="box-title">Sembuh</p>
-              </div>
-              <div className="box">
-                <p className="num" style={{color: "#d8232a"}}>{this.state.isLoaded ? this.state.data.deaths.value : loading}</p>
-                <p className="box-title">Meninggal</p>
-              </div>
+          <div className="flex-home">
+            <div className="box">
+              <p className="num" style={{color: "#f2c94c"}}>
+                {statsStatus === "resolved" ?  stats.confirmed : <SkeletonView />}
+              </p>
+              <p className="box-title">Terkonfirmasi</p>
             </div>
-            <div className="articles">
-              <h2>Berita Terkini</h2>
-                {this.state.articles.map(article => {
-                  let i = article.content.indexOf('…');
-                  let content = article.content.slice(0, i+1)
-                  return(
-                    <div key={article.url} className="box">
-                      <a href={article.url} target="_blank" rel="noopener noreferrer"><h3>{this.state.articlesIsLoaded ? article.title : loading}</h3></a>
-                      <img src={article.urlToImage} alt="Cover"></img>
-                      <p>{this.state.articlesIsLoaded ? content : loading}</p>
-                      <small style={{opacity: '0.5'}}>{new Date(article.publishedAt).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} | {article.author}</small>
-                    </div>
-                  )
-                })}
-                {this.state.articlesIsError && (
-                  <p className="text-center">Gagal memuat berita</p>
-                )
-                }
+            <div className="box">
+              <p className="num" style={{color: "#219653"}}>
+                {statsStatus === "resolved" ?  stats.recovered : <SkeletonView />}
+              </p>
+              <p className="box-title">Sembuh</p>
             </div>
-            <footer>
-              API by <a href="https://mathdro.id/" target="_blank" rel="noopener noreferrer">mathdroid</a> and <a href="https://newsapi.org/" target="_blank" rel="noopener noreferrer">newsapi</a>
-            </footer>
+            <div className="box">
+              <p className="num" style={{color: "#d8232a"}}>
+                {statsStatus === "resolved" ?  stats.deaths : <SkeletonView />}
+              </p>
+              <p className="box-title">Meninggal</p>
+            </div>
           </div>
-      </ThemeProvider>
-    )
-  }
+
+          <div className="articles">
+            <h2>Berita Terkini</h2>
+              {news.map(item => (
+                <div key={item.url} className="box">
+                  <a href={item.url} target="_blank" rel="noopener noreferrer">
+                    <h3>{item.title}</h3>
+                  </a>
+                  <img src={item.urlToImage} alt="Cover"></img>
+                  <p>{item.content}</p>
+                  <small style={{opacity: '0.5'}}>{new Date(item.publishedAt).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} | {item.author}</small>
+                </div>
+              ))}
+              {newsStatus === "error" && (
+                <p className="text-center">Gagal memuat berita</p>
+              )}
+          </div>
+          <footer>
+            API by <a href="https://mathdro.id/" target="_blank" rel="noopener noreferrer">mathdroid</a> and <a href="https://newsapi.org/" target="_blank" rel="noopener noreferrer">newsapi</a>
+          </footer>
+        </div>
+    </ThemeProvider>
+  )
 }
 
 export default App;
