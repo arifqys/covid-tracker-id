@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 
-
-const useCovidStats = () => {
+const useStats = () => {
   const [data, setData] = useState(
     {
       confirmed: 0,
@@ -9,14 +8,14 @@ const useCovidStats = () => {
       death: 0,
     }
   )
-  const [status, setStatus] = useState('idle')
+  const [status, setStatus] = useState("idle")
 
   useEffect(() => {
-    setStatus('loading')
-    fetch('https://covid19.mathdro.id/api/countries/IDN')
+    setStatus("loading")
+    fetch("https://covid19.mathdro.id/api/countries/IDN")
       .then(res => res.json())
       .then(res => {
-        setStatus('resolved')
+        setStatus("resolved")
         setData({
           confirmed: res.confirmed.value,
           recovered: res.recovered.value,
@@ -24,11 +23,11 @@ const useCovidStats = () => {
         })
       })
       .catch(() => {
-        setStatus('error')
+        setStatus("error")
       })
   }, [])
 
   return { data, status }
 }
 
-export default useCovidStats
+export default useStats

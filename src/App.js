@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from './theme';
 import { GlobalStyles } from './global';
@@ -6,7 +6,9 @@ import './App.css';
 
 import ModeToggle from './components/ModeToggle/ModeToggle';
 import FlagId from './img/flag-id.png';
-import useCovidStats from './hooks/useCovidStats';
+
+import useLocalStorage from './hooks/useLocalStorage';
+import useStats from './hooks/useStats';
 import useNews from './hooks/useNews';
 
 const SkeletonView = () => (
@@ -14,21 +16,16 @@ const SkeletonView = () => (
 )
 
 const App = () => {
-  const [theme, setTheme] = useState(lightTheme)
-  const { data: stats, status: statsStatus } = useCovidStats()
+  const [theme, setTheme] = useLocalStorage("theme", "light")
+  const { data: stats, status: statsStatus } = useStats()
   const { data: news, status: newsStatus } = useNews()
 
   const changeTheme = () => {
-    if (theme === lightTheme) {
-      setTheme(darkTheme)
-    }
-    else {
-      setTheme(lightTheme)
-    }
+    setTheme(theme === "light" ? "dark" : "light")
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
       <GlobalStyles />
         <div className="container">
           <h1>Covid Tracker ID <img src={FlagId} alt="Indonesia" height="30" style={{marginBottom: '-5px'}}></img></h1>
