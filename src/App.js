@@ -64,7 +64,7 @@ const App = () => {
                   <small style={{opacity: '0.5'}}>{new Date(item.publishedAt).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} | {item.author}</small>
                 </div>
               ))}
-              {newsStatus === "error" && (
+              {newsStatus === "rejected" && (
                 <p className="text-center">Gagal memuat berita</p>
               )}
           </div>

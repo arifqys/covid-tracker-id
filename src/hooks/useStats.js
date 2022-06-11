@@ -11,7 +11,7 @@ const useStats = () => {
   const [status, setStatus] = useState("idle")
 
   useEffect(() => {
-    setStatus("loading")
+    setStatus("pending")
     fetch("https://covid19.mathdro.id/api/countries/IDN")
       .then(res => res.json())
       .then(res => {
@@ -23,7 +23,7 @@ const useStats = () => {
         })
       })
       .catch(() => {
-        setStatus("error")
+        setStatus("rejected")
       })
   }, [])
 
