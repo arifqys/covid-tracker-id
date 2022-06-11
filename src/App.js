@@ -1,15 +1,15 @@
-import React from 'react';
-import { ThemeProvider } from 'styled-components';
-import { lightTheme, darkTheme } from './theme';
-import { GlobalStyles } from './global';
-import './App.css';
+import React from 'react'
+import { ThemeProvider } from 'styled-components'
+import { lightTheme, darkTheme } from './theme'
+import { GlobalStyles } from './global'
+import './App.css'
 
-import ModeToggle from './components/ModeToggle/ModeToggle';
-import FlagId from './img/flag-id.png';
+import ModeToggle from './components/ModeToggle'
+import FlagId from './img/flag-id.png'
 
-import useLocalStorage from './hooks/useLocalStorage';
-import useStats from './hooks/useStats';
-import useNews from './hooks/useNews';
+import useLocalStorage from './hooks/useLocalStorage'
+import useStats from './hooks/useStats'
+import useNews from './hooks/useNews'
 
 const SkeletonView = () => (
   <span className="skeleton-view"></span>
@@ -29,7 +29,7 @@ const App = () => {
       <GlobalStyles />
         <div className="container">
           <h1>Covid Tracker ID <img src={FlagId} alt="Indonesia" height="30" style={{marginBottom: '-5px'}}></img></h1>
-          <ModeToggle clicked={changeTheme} />
+          <ModeToggle isDarkMode={theme === "dark"} onClick={changeTheme} />
 
           <div className="flex-home">
             <div className="box">
